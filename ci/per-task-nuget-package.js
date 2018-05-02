@@ -6,11 +6,15 @@
 
 // Folder structure:
 
-// _package/per-task-layout (util.perTaskLayoutPath)
-// This containts one folder per task/major version combo that was built. Each folder contains the task contents as well as a nuspec file.
-
-// _package/per-task-publish (util.perTaskPublishPath)
-// This contains one folder per task/major version combo that was built. Each folder contains a .nupkg and push.cmd for that task/major version.
+// _package
+//  /per-task-layout (util.perTaskLayoutPath)
+//      /TASK
+//          task contents
+//          {task name and info}.nuspec *created in this script
+//  /per-task-publish (util.perTaskPublishPath)
+//      /TASK
+//          {task name and info}.nupkg *created in this script
+//          push.cmd *created in this script
 
 // Notes:
 
@@ -67,11 +71,11 @@ if (process.env.DISTRIBUTEDTASK_USE_PERTASK_NUGET) {
     // TODO: Below this line needs to be refactored for the per task nuget setup.
 
     // TODO: I think we need to make changes here but start with this and see where it goes.
-    console.log('> Linking aggregate layout content to per-task-layout path, may need to change this');
-    //var commitHash = refs.head.commit;
-    var commitHash = 'aaaaaa';
-    var taskDestMap = {}; // I don't think this is actually used for anything?
-    util.linkAggregateLayoutContent(util.milestoneLayoutPath, util.perTaskLayoutPath, '', commitHash, taskDestMap);
+    // console.log('> Linking aggregate layout content to per-task-layout path, may need to change this');
+    // //var commitHash = refs.head.commit;
+    // var commitHash = 'aaaaaa';
+    // var taskDestMap = {}; // I don't think this is actually used for anything?
+    // util.linkAggregateLayoutContent(util.milestoneLayoutPath, util.perTaskLayoutPath, '', commitHash, taskDestMap);
 
 
     // Iterate all the folders inside util.perTaskLayoutPath and create a nuspec file, pack, and create push.cmd
@@ -81,9 +85,8 @@ if (process.env.DISTRIBUTEDTASK_USE_PERTASK_NUGET) {
     fs.readdirSync(util.perTaskLayoutPath) // walk each item in the aggregate layout
         .forEach(function (taskName) {
             var taskPath = path.join(util.perTaskLayoutPath, taskName);
-            console.log('> Task path exists: ' + fs.existsSync(taskPath));
-
             console.log();
+            console.log('> Task path exists: ' + fs.existsSync(taskPath));
             console.log('> Task path: ' + taskPath);
 
             // create the nuspec file for task
@@ -115,9 +118,18 @@ if (process.env.DISTRIBUTEDTASK_USE_PERTASK_NUGET) {
 
 
             // Careful, what about major version in folder names? Need to parse task.json and use that.... maybe
-            //console.log('> writing nuspec file');
-            // var taskNuspecPath = path.join(taskPath, 'Mseng.MS.TF.Build.Tasks.' + taskName + '.nuspec');
-            // fs.writeFileSync(taskNuspecPath, contents);
+            console.log('> writing nuspec file');
+            var taskNuspecPath = path.join(taskPath, 'Mseng.MS.TF.Build.Tasks.' + taskName + '.nuspec');
+            console.log('taskNuspecPath: ' + taskNuspecPath);
+            fs.writeFileSync(taskNuspecPath, contents);
+
+
+
+
+
+
+
+
 
             // // pack
             console.log('> packing nuget package for task ' + taskName);
@@ -171,6 +183,17 @@ if (process.env.DISTRIBUTEDTASK_USE_PERTASK_NUGET) {
     console.log('> ');
 
     console.log('> ');
+
+    const getAllFiles = dir =>
+        fs.readdirSync(dir).reduce((files, file) => {
+            const name = path.join(dir, file);
+            const isDirectory = fs.statSync(name).isDirectory();
+            return isDirectory ? [...files, ...getAllFiles(name)] : [...files, name];
+        }, []);
+
+    getAllFiles(util.packagePath).forEach(function (f) { 
+        console.log(f);
+    });
 }
 
 // TODO: Make sure we have a step later that then publishes this artifact.
