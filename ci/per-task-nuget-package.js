@@ -77,6 +77,10 @@ if (process.env.DISTRIBUTEDTASK_USE_PERTASK_NUGET) {
     var commitHash = 'aaaaaa';
     var taskDestMap = {}; // I don't think this is actually used for anything?
     util.linkAggregateLayoutContent(util.milestoneLayoutPath, util.perTaskLayoutPath, '', commitHash, taskDestMap);
+
+    getAllFiles(util.packagePath).forEach(function (f) { 
+        console.log(f);
+    });
     
     // fs.readdirSync(util.aggregateLayoutPath) // walk each item in the aggregate layout
     //     .forEach(function (itemName) {
