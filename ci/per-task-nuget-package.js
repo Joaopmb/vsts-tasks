@@ -184,13 +184,6 @@ if (process.env.DISTRIBUTEDTASK_USE_PERTASK_NUGET) {
 
     console.log('> ');
 
-    const getAllFiles = dir =>
-        fs.readdirSync(dir).reduce((files, file) => {
-            const name = path.join(dir, file);
-            const isDirectory = fs.statSync(name).isDirectory();
-            return isDirectory ? [...files, ...getAllFiles(name)] : [...files, name];
-        }, []);
-
     getAllFiles(util.packagePath).forEach(function (f) { 
         console.log(f);
     });
