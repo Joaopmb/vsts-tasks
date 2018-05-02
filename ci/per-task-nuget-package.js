@@ -1,3 +1,36 @@
+// Overview:
+
+// This script starts with having a folder per task with the content for each task inside.
+// We start by adding a .nuspec file for each task inside the task folder.
+// Then we iterate each of these tasks and create a .nupkg and push.cmd per task.
+
+// Folder structure:
+
+// _package/per-task-layout (util.perTaskLayoutPath)
+// This containts one folder per task/major version combo that was built. Each folder contains the task contents as well as a nuspec file.
+
+// _package/per-task-publish (util.perTaskPublishPath)
+// This contains one folder per task/major version combo that was built. Each folder contains a .nupkg and push.cmd for that task/major version.
+
+// Notes:
+
+// Currently the code works within the legacy setup of having multiple slices that are pushed as artifacts and then recombined.
+// Once this code is live for a while we will remove that legacy code and it should simplify the setup here. We can use the original 
+//    build folders for each task in place of the per-task-layout.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 var fs = require('fs');
 var os = require('os');
 var path = require('path');
@@ -11,6 +44,19 @@ var util = require('./ci-util');
 // Trying to make this code change in such a way that we only need to delete aggregate 
 //      files later and not redo any of the nuget package per task code.
 if (process.env.DISTRIBUTEDTASK_USE_PERTASK_NUGET) {
+    console.log('> printing folder structure before starting');
+
+    const getAllFiles = dir =>
+        fs.readdirSync(dir).reduce((files, file) => {
+            const name = path.join(dir, file);
+            const isDirectory = fs.statSync(name).isDirectory();
+            return isDirectory ? [...files, ...getAllFiles(name)] : [...files, name];
+        }, []);
+
+    getAllFiles(util.packagePath).forEach(function (f) { 
+        console.log(f);
+    });
+
     console.log('> Zipping nuget package per task');
 
     // mkdir _package/per-task-layout
@@ -25,7 +71,7 @@ if (process.env.DISTRIBUTEDTASK_USE_PERTASK_NUGET) {
     //var commitHash = refs.head.commit;
     var commitHash = 'aaaaaa';
     var taskDestMap = {}; // I don't think this is actually used for anything?
-    util.linkAggregateLayoutContent(util.milestoneLayoutPath, util.perTaskLayoutPath, /*release:*/'', commitHash, taskDestMap);
+    util.linkAggregateLayoutContent(util.milestoneLayoutPath, util.perTaskLayoutPath, '', commitHash, taskDestMap);
 
 
     // Iterate all the folders inside util.perTaskLayoutPath and create a nuspec file, pack, and create push.cmd
@@ -83,7 +129,8 @@ if (process.env.DISTRIBUTEDTASK_USE_PERTASK_NUGET) {
             // util.run(`nuget pack "${util.aggregateNuspecPath}" -BasePath "${util.aggregatePackSourcePath}" -NoDefaultExcludes`, /*inheritStreams:*/true);
 
 
-            // TODO: Add detailed example of folder structure for util.publishNugetPerTaskPath vs. util.perTaskLayoutPath
+
+            
 
             // // create push.cmd
             //console.log('> creating push.cmd for task ' + taskName);
