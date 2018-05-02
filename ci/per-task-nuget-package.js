@@ -75,8 +75,12 @@ if (process.env.DISTRIBUTEDTASK_USE_PERTASK_NUGET) {
     // //var commitHash = refs.head.commit;
     // var commitHash = 'aaaaaa';
     // var taskDestMap = {}; // I don't think this is actually used for anything?
-    // util.linkAggregateLayoutContent(util.milestoneLayoutPath, util.perTaskLayoutPath, '', commitHash, taskDestMap);
-
+    util.linkAggregateLayoutContent(util.milestoneLayoutPath, util.perTaskLayoutPath, '', commitHash, taskDestMap);
+    
+    // fs.readdirSync(util.aggregateLayoutPath) // walk each item in the aggregate layout
+    //     .forEach(function (itemName) {
+    //         util.
+    //     });
 
     // Iterate all the folders inside util.perTaskLayoutPath and create a nuspec file, pack, and create push.cmd
     console.log();
