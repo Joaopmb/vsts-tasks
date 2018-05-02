@@ -73,8 +73,9 @@ if (process.env.DISTRIBUTEDTASK_USE_PERTASK_NUGET) {
     // TODO: I think we need to make changes here but start with this and see where it goes.
     // console.log('> Linking aggregate layout content to per-task-layout path, may need to change this');
     // //var commitHash = refs.head.commit;
-    // var commitHash = 'aaaaaa';
-    // var taskDestMap = {}; // I don't think this is actually used for anything?
+
+    var commitHash = 'aaaaaa';
+    var taskDestMap = {}; // I don't think this is actually used for anything?
     util.linkAggregateLayoutContent(util.milestoneLayoutPath, util.perTaskLayoutPath, '', commitHash, taskDestMap);
     
     // fs.readdirSync(util.aggregateLayoutPath) // walk each item in the aggregate layout
