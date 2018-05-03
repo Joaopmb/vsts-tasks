@@ -152,7 +152,11 @@ if (process.env.DISTRIBUTEDTASK_USE_PERTASK_NUGET) {
             var taskPushCmdPath = path.join(taskPublishFolder, 'push.cmd'); // e.g. - _package\publish-per-task\AzureCLIV1__v1\push.cmd
 
             // TODO: These packages need to have the task version in the name
-            //fs.writeFileSync(util.taskPushCmdPath, `nuget.exe push Mseng.MS.TF.Build.Tasks.${process.env.AGGREGATE_VERSION}.nupkg -source "${process.env.AGGREGATE_TASKS_FEED_URL}" -apikey Skyrise`);
+            // TODO: Need to get task name from task.json not the folder.
+            var taskVersion = '0.0.0'; // TODO: Get from task.json too
+            var nupkgName = `Mseng.MS.TF.Build.Tasks.${taskName}.${taskVersion}.nupkg`;
+            var taskFeedUrl = process.env.AGGREGATE_TASKS_FEED_URL; // Need the task feed per task. This is based on task name from task.json too.
+            fs.writeFileSync(util.taskPushCmdPath, `nuget.exe push ${nupkgName} -source "${taskFeedUrl}" -apikey Skyrise`);
         });
 
 
