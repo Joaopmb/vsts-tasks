@@ -140,7 +140,7 @@ if (process.env.DISTRIBUTEDTASK_USE_PERTASK_NUGET) {
             // pack
             console.log('> packing nuget package for task ' + taskName);
             var taskPublishFolder = path.join(util.publishNugetPerTaskPath, taskName);
-            var taskNuspecPath = path.join(taskPublishFolder, taskName + ".nuspec");
+            //var taskNuspecPath = path.join(taskPublishFolder, taskName + ".nuspec");
 
             fs.mkdirSync(taskPublishFolder); // make the folder that we will publish, publish-per-task
             process.chdir(taskPublishFolder);
@@ -162,17 +162,12 @@ if (process.env.DISTRIBUTEDTASK_USE_PERTASK_NUGET) {
 
     console.log('> ');
 
-    console.log('> ');
-
-    console.log('> ');
-
     getAllFiles(util.packagePath).forEach(function (f) { 
         console.log(f);
     });
 }
 
 // TODO: Make sure we have a step later that then publishes this artifact.
-
 
 
 
