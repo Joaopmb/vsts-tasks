@@ -13,7 +13,7 @@
 //          {task name and info}.nuspec *created in this script
 //  /per-task-publish (util.perTaskPublishPath)
 //      /TASK
-//          {task name and info}.nupkg *created in this script
+//          {task name and info}.nupkg *created in this script, think this is actually .nuspec
 //          push.cmd *created in this script
 
 // Notes:
@@ -93,7 +93,12 @@ if (process.env.DISTRIBUTEDTASK_USE_PERTASK_NUGET) {
 
     fs.readdirSync(util.perTaskLayoutPath) // walk each item in the aggregate layout
         .forEach(function (taskName) {
-            var taskPath = path.join(util.perTaskLayoutPath, taskName);
+            if (taskName.indexOf('aaaaaa') > -1) {
+                // For some reason there is also D:\a\1\s\_package\per-task-layout\AzurePowerShellV3__v3_aaaaaa
+                return;
+            }
+
+            var taskPath = path.join(util.perTaskLayoutPath, taskName); // e.g. - _package\per-task-layout\AzurePowerShellV3__v3. For some reason there is also D:\a\1\s\_package\per-task-layout\AzurePowerShellV3__v3_aaaaaa
             console.log();
             console.log('> Task path exists: ' + fs.existsSync(taskPath));
             console.log('> Task path: ' + taskPath);
@@ -128,62 +133,26 @@ if (process.env.DISTRIBUTEDTASK_USE_PERTASK_NUGET) {
 
             // Careful, what about major version in folder names? Need to parse task.json and use that.... maybe
             console.log('> writing nuspec file');
-            var taskNuspecPath = path.join(taskPath, 'Mseng.MS.TF.Build.Tasks.' + taskName + '.nuspec');
+            var taskNuspecPath = path.join(taskPath, 'Mseng.MS.TF.Build.Tasks.' + taskName + '.nuspec'); // e.g. - _package\per-task-layout\AzureCLIV1__v1\Mseng.MS.TF.Build.Tasks.AzureCLIV1__v1.nuspec
             console.log('taskNuspecPath: ' + taskNuspecPath);
             fs.writeFileSync(taskNuspecPath, contents);
 
-
-
-
-
-
-
-
-
-            // // pack
+            // pack
             console.log('> packing nuget package for task ' + taskName);
             var taskPublishFolder = path.join(util.publishNugetPerTaskPath, taskName);
+            var taskNuspecPath = path.join(taskPublishFolder, taskName + ".nuspec");
 
             fs.mkdirSync(taskPublishFolder); // make the folder that we will publish, publish-per-task
             process.chdir(taskPublishFolder);
-            fs.writeFileSync(path.join(taskPublishFolder, 'test.txt'), 'Here is my file content');
-            // util.run(`nuget pack "${util.aggregateNuspecPath}" -BasePath "${util.aggregatePackSourcePath}" -NoDefaultExcludes`, /*inheritStreams:*/true);
+            //fs.writeFileSync(path.join(taskPublishFolder, 'test.txt'), 'Here is my file content');
+            util.run(`nuget pack "${taskNuspecPath}" -BasePath "${taskPath}" -NoDefaultExcludes`, /*inheritStreams:*/true); // this must create the nupkg from the nuspec
 
+            // create push.cmd
+            console.log('> creating push.cmd for task ' + taskName);
+            var taskPushCmdPath = path.join(taskPublishFolder, 'push.cmd'); // e.g. - _package\publish-per-task\AzureCLIV1__v1\push.cmd
 
-
-            
-
-            // // create push.cmd
-            //console.log('> creating push.cmd for task ' + taskName);
-            // fs.writeFileSync(util.publishPushCmdPath, `nuget.exe push Mseng.MS.TF.Build.Tasks.${process.env.AGGREGATE_VERSION}.nupkg -source "${process.env.AGGREGATE_TASKS_FEED_URL}" -apikey Skyrise`);
-
-
-
-
-
-            // if (!fs.statSync(itemPath).isDirectory()) { // skip files
-            //     return;
-            // }
-
-            // // load the task.json
-            // var taskPath = path.join(itemPath, 'task.json');
-            // var task = JSON.parse(fs.readFileSync(taskPath));
-            // if (typeof task.version.Major != 'number') {
-            //     throw new Error(`Expected task.version.Major/Minor/Patch to be a number (${taskPath})`);
-            // }
-
-            // util.assert(task.id, `task.id (${taskPath})`);
-            // if (typeof task.id != 'string') {
-            //     throw new Error(`Expected id to be a string (${taskPath})`);
-            // }
-
-            // // validate GUID + Major version is unique
-            // var key = task.id + task.version.Major;
-            // if (majorVersions[key]) {
-            //     throw new Error(`Tasks GUID + Major version must be unique within the aggregate layout. Task 1: ${majorVersions[key]}; task 2: ${taskPath}`);
-            // }
-
-            // majorVersions[key] = taskPath;
+            // TODO: These packages need to have the task version in the name
+            //fs.writeFileSync(util.taskPushCmdPath, `nuget.exe push Mseng.MS.TF.Build.Tasks.${process.env.AGGREGATE_VERSION}.nupkg -source "${process.env.AGGREGATE_TASKS_FEED_URL}" -apikey Skyrise`);
         });
 
 
